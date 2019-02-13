@@ -7,6 +7,8 @@ import io.reactivex.Scheduler;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 /**
  * @Auther: Wuyulong
  * @Date: 2019/2/12 21:12
@@ -15,24 +17,25 @@ import io.reactivex.schedulers.Schedulers;
 public class Create {
 
 
-    public static void main(String[] args) {
-        Disposable subscribe = Observable.create(emitter -> {
+    public static void main(String[] args) throws InterruptedException {
+        Observable<Object> objectObservable = Observable.create(emitter -> {
+            AtomicLong atomicLong = new AtomicLong(2);
             System.out.println("emitter");
-            emitter.onNext("hello");
-            emitter.onError(new RuntimeException("run time exception"));
-        })
-        .subscribeOn(Schedulers.computation())
-        .subscribe(str -> {
-            System.out.println(str + " world");
-        }, e -> {
-            System.out.println(e.getMessage());
+            emitter.onNext(atomicLong);
+        }).subscribeOn(Schedulers.computation());
+        objectObservable.subscribe(atomic -> {
+            if (atomic instanceof AtomicLong){
+                AtomicLong atomicLong = (AtomicLong) atomic;
+                System.out.println(atomicLong.getAndIncrement());
+            }
+        });
+        objectObservable.subscribe(atomic -> {
+            if (atomic instanceof AtomicLong){
+                AtomicLong atomicLong = (AtomicLong) atomic;
+                System.out.println(atomicLong.getAndIncrement());
+            }
         });
 
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-
-
-        }
+        Thread.sleep(1000);
     }
 }
